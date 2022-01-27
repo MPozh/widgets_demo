@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:widgets_demo/text_demo_screen.dart';
+import 'package:widgets_demo/screen/text_demo_screen.dart';
+import 'package:widgets_demo/utils/global_theme.dart';
 
 class NavigationDemoScreen extends StatefulWidget {
   const NavigationDemoScreen({Key? key}) : super(key: key);
@@ -14,6 +15,7 @@ class _NavigationDemoScreenState extends State<NavigationDemoScreen> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: globalTheme(),
       //home: const MailScreen() - home здесь нельзя указывать, не работает с initialRoute
       initialRoute: '/',
       routes: {
