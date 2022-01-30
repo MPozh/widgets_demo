@@ -15,7 +15,7 @@ ThemeData globalTheme() => ThemeData(
 
   textTheme: const TextTheme(
     headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
-    headline6: TextStyle(fontSize: 30.0, fontStyle: FontStyle.italic),
+    headline6: TextStyle(fontSize: 22.0, fontStyle: FontStyle.italic),
     headline5: TextStyle(fontSize: 24.0, color: Colors.purple),
     bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind', color: Colors.deepPurple),
   ),
