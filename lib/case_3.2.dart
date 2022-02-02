@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'utils/global_theme.dart';
+import 'package:widgets_demo/utils/global_theme.dart';
 
 Future<Post> fetchPost() async {
   final response = await http
@@ -62,20 +62,41 @@ class _NetWorkScreen1State extends State<NetWorkScreen1> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Пример загрузки данных'),
-        ),
-        body: Center(
-          child: FutureBuilder<Post>(
-            future: futurePost,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Text(snapshot.data!.body, textAlign: TextAlign.center,);
-              } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
-              }
-              //по умолчанию показать крутилку
-              return const CircularProgressIndicator();
-            },
           ),
+          body: Center(
+           child: Column(mainAxisSize: MainAxisSize.min,
+             children:[
+             Text("Заголовок", style: Theme.of(context).textTheme.headline5,),
+             SizedBox(height: 10,),
+             FutureBuilder<Post>(
+                  future: futurePost,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Text(snapshot.data!.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyText2,);
+                    } else if (snapshot.hasError) {
+                      return Text('${snapshot.error}');
+                    }
+                    //по умолчанию показать крутилку
+                    return const CircularProgressIndicator();
+                  },
+                ),
+               SizedBox(height: 10,),
+               Text('Тело', style: Theme.of(context).textTheme.headline5,),
+               SizedBox(height: 10,),
+               FutureBuilder<Post>(
+                 future: futurePost,
+                 builder: (context, snapshot) {
+                 if (snapshot.hasData) {
+                return Text(snapshot.data!.body, textAlign: TextAlign.center,);
+                 }    else if (snapshot.hasError) {
+                return Text('${snapshot.error}');
+                 }
+                   //по умолчанию показать крутилку
+                return const CircularProgressIndicator();
+                },
+               ),
+            ],
+           ),
         ),
       ),
     );

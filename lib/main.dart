@@ -3,7 +3,9 @@ import 'package:widgets_demo/case_3.2.dart';
 import 'package:widgets_demo/screen/app_bar_screen.dart';
 import 'package:widgets_demo/case_3_1.dart';
 import 'package:widgets_demo/screen/files_demo_screen.dart';
+import 'package:widgets_demo/screen/network_list_screen.dart';
 import 'package:widgets_demo/theme_demo_scrren.dart';
+import 'final.dart';
 import 'screen/listview_screen.dart';
 import 'screen/network_screen.dart';
 import 'screen/shared_pref_screen.dart';
@@ -26,7 +28,8 @@ void main() {
   //runApp(const ListViewScreen ());
   //runApp(const SharedPrefScreen ());
   //runApp(const FilesDemoScreen1 ());
-  runApp(const NetWorkScreen1 ());
+  runApp(const MyApp());
+  //runApp(const NetWorkScreen2());
 
 
 
