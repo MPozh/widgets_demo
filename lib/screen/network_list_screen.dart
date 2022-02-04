@@ -8,171 +8,215 @@ import 'package:widgets_demo/utils/global_theme.dart';
 import '../final.dart';
 
 
-Future<List<User>> fetchUsers(http.Client client) async {
-  final response = await client
-      .get(Uri.parse('https://jsonplaceholder.typicode.com/users'));
+Future<List<User>> fetchUsersList() async {
+  final response = await http.get(Uri.parse('https://jsonplaceholder.typicode.com/users'));
 
   if (response.statusCode ==200) {
+    List jsonResponse = json.decode(response.body);
     //если сервер вернет ответ 200 ok, то загружаем данные
     //return Users.fromJson(jsonDecode(response.body));
-    return compute(parseUsers, response.body);
+    return jsonResponse.map((user) => User.fromJson(user)).toList();
 
   } else {
     //если сервер не вернет ответ 200 ok, то выбрасываем исключение
-    throw Exception('Не удалось загрузить альбом');
+    throw Exception('Не удалось загрузить список пользователей');
   }
 }
 
-List<User> parseUsers(String responseBody) {
-  final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
-
-  return parsed.map<User>((json) => User.fromJson(json)).toList();
+ListView usersListView(data) {
+  return ListView.builder(
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        return userListTile(data[index].name, data[index].email, Icons.work);
+      });
 }
+
+ListTile userListTile(String title, String subtitle, IconData icon) => ListTile(
+    title: Text(title,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 20,
+          color: Colors.purple,
+        )),
+    subtitle: Text(subtitle),
+    leading: Icon(
+      icon,
+      color: Colors.purpleAccent[100],
+    ),
+  );
 
 class User {
   final int id;
   final String name;
-  //final String username;
   final String email;
-  //final String address;
-  //final String phone;
-  //final String website;
-  //final String company;
 
-  const User({
+  User({
     required this.id,
     required this.name,
-  //required this.username,
     required this.email,
-  //required this.address,
-  //required this.phone,
-  //required this.website,
-    //required this.company,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      //username: json['username'] as String,
-      email: json['email'] as String,
-      //address: json['address'] as String,
-      //phone: json['phone'] as String,
-      //website: json['website'] as String,
-      //company: json['company'] as String,
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
     );
   }
 }
 
-//class NetWorkScreen2 extends StatelessWidget {
-//  const NetWorkScreen2 ({Key? key}) : super(key: key);
-class ListScreen extends StatelessWidget {
-  const ListScreen({Key? key}) : super(key: key);
 
+class UsersListScreen extends StatefulWidget {
+  const UsersListScreen({Key? key}) : super(key: key);
+
+  @override
+  _UsersListScreenState createState() => _UsersListScreenState();
+}
+
+class _UsersListScreenState extends State<UsersListScreen> {
+  late Future<List<User>> futureUsersList;
+  late List<User> usersListData;
+
+  @override
+  void initState() {
+    super.initState();
+    futureUsersList = fetchUsersList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    const appTitle = 'Демочка';
-    return const MaterialApp(
-      title: appTitle,
-      home: MyHomePage(title: appTitle),
+    return MaterialApp(
+      theme: globalTheme(),
+        home: Scaffold(
+         appBar: AppBar(title: const Text('Контакты'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/');
+                },
+                child: const Text("Выйти"),
+                style: TextButton.styleFrom(primary: Theme
+                    .of(context)
+                    .colorScheme
+                    .onPrimary),)
+            ],),
+         drawer: navDrawer(context),
+         body:   Center(
+           child: FutureBuilder<List<User>>(
+            future: futureUsersList,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                usersListData = snapshot.data!;
+                return usersListView(usersListData);
+              } else if (snapshot.hasError) {
+                return Text('${snapshot.error}');
+              }
+
+              return const CircularProgressIndicator();
+            })
+    ),
+    ),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+Widget navDrawer(context) => Drawer(
+  child: ListView(padding: EdgeInsets.zero, children: [
+    DrawerHeader(
+        decoration: const BoxDecoration(color: Colors.purple),
+        child: Container(height: 200,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 100,
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(50.0))
+                ),
+                child: Image.network("https://static10.tgstat.ru/channels/_0/b1/b1cf4bacedfe34fd4386f7ef923b1310.jpg",),
+              ),
+              const Text("Досье",style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),),
+            ],
+          ),
+        )
+    ),
 
-  final String title;
+    ListTile(
+      leading: const Icon(Icons.one_k, color: Colors.deepPurple,),
+      title: const Text("Главная", style: TextStyle(color: Colors.deepPurple, fontSize: 20),),
+      onTap: () {
+        //Navigator.pop(context);
+        Navigator.pushNamed(context, '/');
+      },
+    ),
+    ListTile(
+      leading: const Icon(Icons.two_k, color: Colors.deepPurple,),
+      title: const Text("Контакты", style: TextStyle(color: Colors.deepPurple, fontSize: 20),),
+      onTap: () {
+        //Navigator.pop(context);
+        Navigator.pushNamed(context, '/list');
+      },
+    ),
+    const Divider(),
+    const Padding(
+      padding: EdgeInsets.only(left: 10),
+      child: Text("Профиль", style: TextStyle(color: Colors.deepPurple, fontSize: 20),),
+    ),
+    ListTile(
+      leading: const Icon(Icons.three_k, color: Colors.deepPurple,),
+      title: const Text("Подробнее", style: TextStyle(color: Colors.deepPurple, fontSize: 20),),
+      onTap: () {
+        //Navigator.pop(context);
+        Navigator.pushNamed(context, '/second');
+      },
+    ),
+  ],
+  ),
+);
+
+
+class SecondScreen1 extends StatefulWidget {
+  const SecondScreen1({Key? key}) : super(key: key);
+
+  @override
+  _SecondScreen1State createState() => _SecondScreen1State();
+}
+
+class _SecondScreen1State extends State<SecondScreen1> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Название'),
-        actions: [
+    return MaterialApp(
+      theme: globalTheme(),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('Контакты'),
+        actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pushNamed(context, '/');
             },
-            child: const Text("Выбрать"),
+            child: const Text("Выйти"),
             style: TextButton.styleFrom(primary: Theme
                 .of(context)
                 .colorScheme
-                .onPrimary)),
-        ],
-      ),
-      body: FutureBuilder<List<User>>(
-        future: fetchUsers(http.Client()),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text('Ошиб'),
-            );
-          } else if (snapshot.hasData) {
-            return UsersList(users: snapshot.data!);
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
-    );
-  }
-}
-
-class UsersList extends StatelessWidget {
-  const UsersList({Key? key, required this.users}) : super(key: key);
-
-  final List<User> users;
-
-   @override
-  Widget build(BuildContext context) {
-//    return GridView.builder(
-//      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-//        crossAxisCount: 2,
-//      ),
-//      itemCount: photos.length,
-//      itemBuilder: (context, index) {
-//        return Image.network(photos[index].thumbnailUrl);
-//      },
-//    );
-    return ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: users.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            title: Text('User $users'),
-              onTap: () {}
-              );
-         // return Image.network(photos[index].thumbnailUrl);
-        },
-    );
-  }
-}
-
-
-
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Контакты')),
-      drawer: navDrawer(context),
-      body: Center(
-        child: Column(mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Страница контактов'),
-              const SizedBox(height: 100,),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Назад'),),
-            ]
+                .onPrimary),)
+        ],),
+        drawer: navDrawer(context),
+        body: Center(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Адрес, место работы'),
+                const SizedBox(height: 100,),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Назад'),),
+              ]
+          ),
         ),
       ),
     );
   }
+}
